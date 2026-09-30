@@ -27,9 +27,14 @@ export class TransactionContents {
     @Column('decimal')
     price: number
 
-    @ManyToOne(() => Product, (product) => product.id, { eager: true, cascade: true })
+    // entity modificado para eliminar dependencia de cacada a productos
+    // @ManyToOne(() => Product, (product) => product.id, { eager: true, cascade: true })
+    // product: Product
+    @ManyToOne(() => Product, { eager: true })
     product: Product
 
-    @ManyToOne(() => Transaction, (transaction) => transaction.contents, { cascade: true })
+    // @ManyToOne(() => Transaction, (transaction) => transaction.contents, { cascade: true })
+    // transaction: Transaction
+    @ManyToOne(() => Transaction, (transaction) => transaction.contents)
     transaction: Transaction
 }

@@ -43,6 +43,8 @@ export class TransactionsService {
         }
 
         product.inventory -= contents.quantity;
+        // como borramos el cascade a producto del entity, ahora debemos guardar manualmente el product
+        await transacrionEntityManager.save(product);
 
         // await this.transactionContentsRepository.save({ ...contents, transaction, product });
         // await transacrionEntityManager.save({ ...contents, transaction, product });
@@ -54,7 +56,7 @@ export class TransactionsService {
         transactionContent.quantity = contents.quantity;
         transactionContent.transaction = transaction;
 
-        await transacrionEntityManager.save(transaction)
+        await transacrionEntityManager.save(transaction) // nota: esto se puede sacar del bucle, solo lo necesitamos guardar 1 vez
         await transacrionEntityManager.save(transactionContent);
       }
     })
@@ -120,18 +122,28 @@ export class TransactionsService {
       const product = await this.productRepository.findOneBy({ id: contents.product.id });
       // mi codigo: en nuevas versiones product no puede ser null, verificamos con un if aunque es un caso que nunca pueda pasar!
       if (!product) {
-        throw new BadRequestException('No se encontró el producto para restaurar el inventario');
+        throw new NotFoundException(`No se encontró el producto con ID ${contents.product.id} para restaurar stock.`);
       }
+      //
       product.inventory += contents.quantity;
       await this.productRepository.save(product);
+
 
       const transactionContents = await this.transactionContentsRepository.findOneBy({ id: contents.id });
       // mi codigo: mismo caso, transactionContents no puede ser null, verificamos aunque no pueda pasar
       if (!transactionContents) {
         throw new BadRequestException('No habia contents en la transaccion');
       }
-      console.log(transactionContents)
+      //
       await this.transactionContentsRepository.remove(transactionContents);
+
+      /*
+      // solucion sin modificar el entity
+       const contentIds = transaction.contents.map(content => content.id);
+       if (contentIds.length > 0) {
+         await this.transactionContentsRepository.delete(contentIds);
+       }
+      */
     }
 
     await this.transactionRepository.remove(transaction);
