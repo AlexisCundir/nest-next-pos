@@ -8,6 +8,7 @@ import { typeOrmConfig } from './config/typeorm.config.js';
 import { ProductsModule } from './products/products.module.js';
 import { TransactionsModule } from './transactions/transactions.module.js';
 import { CouponsModule } from './coupons/coupons.module.js';
+import { SeederModule } from './seeder/seeder.module.js';
 
 @Module({
   imports: [
